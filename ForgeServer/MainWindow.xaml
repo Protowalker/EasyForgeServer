@@ -5,8 +5,97 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ForgeServer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="MainWindow" Height="450.775" Width="800">
+    <Window.Resources>
+        <Style x:Key="placeHolder" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Grid>
+                            <TextBox Text="{Binding Path=Text,
+                                                RelativeSource={RelativeSource TemplatedParent}, 
+                                                Mode=TwoWay,
+                                                UpdateSourceTrigger=PropertyChanged}"
+                                 x:Name="textSource" 
+                                 Background="Transparent" 
+                                 Panel.ZIndex="2" />
+                            <TextBox Text="{TemplateBinding Tag}" Background="{TemplateBinding Background}" Panel.ZIndex="1">
+                                <TextBox.Style>
+                                    <Style TargetType="{x:Type TextBox}">
+                                        <Setter Property="Foreground" Value="Transparent"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=Text, Source={x:Reference textSource}}" Value="">
+                                                <Setter Property="Foreground" Value="Gray"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Viewbox Stretch="Fill" Name="ViewBox">
+        <Grid Height="420" Width="792">
+            <TabControl TabStripPlacement="Left" HorizontalAlignment="Left" Width="792">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Width" Value="117"/>
+                    </Style>
+                </TabControl.Resources>
+
+                <TabItem IsSelected="True" Margin="0,-2,0,-23">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image></Image>
+                            <TextBlock Text="Console"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid>
+                        <Border Margin="10,5,10,112" BorderBrush="DarkGray" BorderThickness="1">
+                            <ScrollViewer Margin="0,0,0,0" ScrollChanged="OnScrollViewerScrollChanged" Grid.Column="1">
+                                <TextBlock x:Name="consoleOutputBlock" TextWrapping="Wrap" >
+                                    <TextBlock.Style>
+                                        <Style>
+                                            <Setter Property="TextBlock.Background" Value="#999999"/>
+                                            <Setter Property="TextBlock.Foreground" Value="Black"/>
+
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </ScrollViewer>
+                        </Border>
+                        <UniformGrid Margin="132,341,135,45">
+                            <Button x:Name="start_button" Content="Start Server" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="28" IsEnabled="True" Click="OnStartButtonClick" Margin="0,0,0,-14"/>
+                            <Button x:Name="stop_button" Content="Stop Server" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="28" IsEnabled="False" Click="OnStopButtonClick" Margin="-50,0,0,-14"/>
+                            <Button x:Name="restart_button" Content="Restart Server" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="28" IsEnabled="False" Click="OnRestartButtonClick" Margin="300,-14,-200,0"/>
+                        </UniformGrid>
+                        <TextBox x:Name="console_input" HorizontalAlignment="Left" Height="23" Margin="10,302,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="629" Style="{StaticResource ResourceKey=placeHolder}" Tag="Console input (commands)" KeyDown="OnConsoleInputKeyDown" IsEnabled="False"/>
+
+                    </Grid>
+                </TabItem>
+                <TabItem Margin="0,23,0,-48">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image></Image>
+                            <TextBlock Text="Mods"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem Margin="0,48,0,-73">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image></Image>
+                            <TextBlock Text="Configuration"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+            </TabControl>
+
+        </Grid>
+    </Viewbox>
 </Window>
