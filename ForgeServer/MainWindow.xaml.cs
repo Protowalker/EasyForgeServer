@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using WPFCustomMessageBox;
 
 namespace ForgeServer
 {
@@ -38,6 +32,8 @@ namespace ForgeServer
             errorBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#e02d0d"));
 
             ((Program)Application.Current.Properties["program"]).PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnProgramPropertyChanged);
+            string[] dirAsPath = (Properties.Settings.Default.ServerDirectory).Split('\\');
+            Title = dirAsPath[dirAsPath.Length - 1];
         }
 
         private void OnProgramPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -133,12 +129,65 @@ namespace ForgeServer
 
         private void OnStartButtonClick(object sender, RoutedEventArgs e)
         {
-            WriteToConsole("Server Starting\n", Brushes.Green);
-            ((Program)Application.Current.Properties["program"]).StartServer();
-            restart_button.IsEnabled = false;
-            stop_button.IsEnabled = false;
-            start_button.IsEnabled = false;
+            Program program = ((Program)Application.Current.Properties["program"]);
+            bool forgeInstalled = program.DoForgeCheck();
+            bool eulaAgreed = program.DoEULACheck();
+
+            if (!forgeInstalled)
+            {
+                if (!program.TryInstall())
+                {
+                    AskToInstallForge();
+                } else
+                {
+                    WriteToConsole("Installing Server...", commandBrush);
+                }
+            } else if (!eulaAgreed)
+            {
+                eulaAgreed = AskToAgreeToEULA();
+            }
+            if(forgeInstalled && eulaAgreed)
+            {
+                WriteToConsole("Server Starting\n", Brushes.Green);
+                ((Program)Application.Current.Properties["program"]).StartServer();
+                restart_button.IsEnabled = false;
+                stop_button.IsEnabled = false;
+                start_button.IsEnabled = false;
+            }
+
         }
+
+        private void AskToInstallForge()
+        {
+            MessageBoxResult result = MessageBox.Show("Cannot find your forge jar. You can go to the download site by clicking OK below. Download the file marked Installer (NOT windows installer!) and place it in your server's directory.", "Forge Server Not found", MessageBoxButton.OKCancel);
+            if(result == MessageBoxResult.OK)
+            {
+                System.Diagnostics.Process.Start("https://files.minecraftforge.net/");
+            }
+        }
+
+        private bool AskToAgreeToEULA()
+        {
+            MessageBoxResult result = CustomMessageBox.ShowYesNoCancel("By clicking Agree you hereby agree to the Mojang EULA (End User License Agreement).", "EULA", "Read EULA", "Agree", "Disagree");
+
+            while(result == MessageBoxResult.Yes)
+            {
+                Process.Start("https://account.mojang.com/documents/minecraft_eula");
+                result = CustomMessageBox.ShowYesNoCancel("By clicking Agree you hereby agree to the Mojang EULA (End User License Agreement).", "EULA", "Read", "Agree", "Disagree");
+            }
+
+            if (result == MessageBoxResult.No)
+            {
+                StreamWriter writer = new StreamWriter(ForgeServer.Properties.Settings.Default.ServerDirectory + "\\eula.txt");
+                writer.WriteLine("eula=true");
+                writer.Close();
+                return true;
+            } else
+            {
+                return false;
+            }
+        }
+
         private void OnStopButtonClick(object sender, RoutedEventArgs e)
         {
             WriteToConsole("Server Shutting Down\n", Brushes.Red);
@@ -157,6 +206,24 @@ namespace ForgeServer
             start_button.IsEnabled = false;
 
             restarting = true;
+        }
+
+        private void OnChooseServerButtonClick(object sender, RoutedEventArgs e)
+        {
+            Program program = ((Program)Application.Current.Properties["program"]);
+            string directory = program.ChooseServerDirectory();
+            if(directory != null)
+            {
+                ForgeServer.Properties.Settings.Default.ServerDirectory = directory;
+                Properties.Settings.Default.Save();
+                Properties.Settings.Default.Reload();
+                program.StopServer();
+
+                program.SetupServer();
+
+                string[] dirAsPath = directory.Split('\\');
+                Title = dirAsPath[dirAsPath.Length - 1];
+            }
         }
     }
 }

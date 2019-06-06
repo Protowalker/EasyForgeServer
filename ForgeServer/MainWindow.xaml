@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ForgeServer"
+        xmlns:properties="clr-namespace:ForgeServer.Properties"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450.775" Width="800">
+        Title="Server" Height="450.775" Width="800">
     <Window.Resources>
         <Style x:Key="placeHolder" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="Template">
@@ -41,7 +42,12 @@
     </Window.Resources>
     <Viewbox Stretch="Fill" Name="ViewBox">
         <Grid Height="420" Width="792">
-            <TabControl TabStripPlacement="Left" HorizontalAlignment="Left" Width="792">
+            <Menu Name="MainMenu" Height="20" Margin="0,0,0,400" Cursor="Arrow">
+                <MenuItem Header="_File" FontSize="13" >
+                    <MenuItem Header="Choose Server Directory..." Click="OnChooseServerButtonClick" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5"/>
+                </MenuItem>
+            </Menu>
+            <TabControl TabStripPlacement="Left" HorizontalAlignment="Left" Width="792" Margin="0,20,0,0">
                 <TabControl.Resources>
                     <Style TargetType="TabItem">
                         <Setter Property="Width" Value="117"/>
@@ -69,7 +75,7 @@
                                 </TextBlock>
                             </ScrollViewer>
                         </Border>
-                        <UniformGrid Margin="132,341,135,45">
+                        <UniformGrid Margin="132,341,135,25">
                             <Button x:Name="start_button" Content="Start Server" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="28" IsEnabled="True" Click="OnStartButtonClick" Margin="0,0,0,-14"/>
                             <Button x:Name="stop_button" Content="Stop Server" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="28" IsEnabled="False" Click="OnStopButtonClick" Margin="-50,0,0,-14"/>
                             <Button x:Name="restart_button" Content="Restart Server" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="28" IsEnabled="False" Click="OnRestartButtonClick" Margin="300,-14,-200,0"/>
@@ -85,6 +91,14 @@
                             <TextBlock Text="Mods"/>
                         </StackPanel>
                     </TabItem.Header>
+                    <Grid>
+                        <ListBox x:Name="listBox" HorizontalAlignment="Left" Height="306" Margin="10,10,0,0" VerticalAlignment="Top" Width="214">
+                            
+                        </ListBox>
+                            <Button Margin="10,321,595,50" Name="AddModsButton" FontSize="11" Content="Add..."/>
+                        <Button Margin="162,321,443,50" Name="RemoveModsButton" FontSize="11" Content="Remove"/>
+                        <Button Margin="86,321,519,50" Name="DownloadModsButton" FontSize="11" Content="Download..."/>
+                    </Grid>
                 </TabItem>
                 <TabItem Margin="0,48,0,-73">
                     <TabItem.Header>
